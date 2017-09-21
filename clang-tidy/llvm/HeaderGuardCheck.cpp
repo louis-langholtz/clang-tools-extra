@@ -15,7 +15,12 @@ namespace llvm {
 
 LLVMHeaderGuardCheck::LLVMHeaderGuardCheck(StringRef Name,
                                            ClangTidyContext *Context)
-    : HeaderGuardCheck(Name, Context) {}
+    : HeaderGuardCheck(Name, Context),
+      RfindString(Options.get("RfindString", "")) {}
+
+void LLVMHeaderGuardCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
+  Options.store(Opts, "RfindString", RfindString);
+}
 
 std::string LLVMHeaderGuardCheck::getHeaderGuard(StringRef Filename,
                                                  StringRef OldGuard) {
@@ -28,6 +33,11 @@ std::string LLVMHeaderGuardCheck::getHeaderGuard(StringRef Filename,
   size_t PosInclude = Guard.rfind("include/");
   if (PosInclude != StringRef::npos)
     Guard = Guard.substr(PosInclude + std::strlen("include/"));
+  else if (!RfindString.empty()) {
+    PosInclude = Guard.rfind(RfindString);
+    if (PosInclude != StringRef::npos)
+      Guard = Guard.substr(PosInclude);
+  }
 
   // For clang we drop the _TOOLS_.
   size_t PosToolsClang = Guard.rfind("tools/clang/");

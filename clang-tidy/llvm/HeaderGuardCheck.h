@@ -31,6 +31,11 @@ public:
 
   bool shouldSuggestEndifComment(StringRef Filename) override { return false; }
   std::string getHeaderGuard(StringRef Filename, StringRef OldGuard) override;
+
+private:
+  void storeOptions(ClangTidyOptions::OptionMap &Options) override;
+
+  const std::string RfindString;
 };
 
 } // namespace llvm
